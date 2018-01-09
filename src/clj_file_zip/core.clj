@@ -1,5 +1,8 @@
 (ns clj-file-zip.core
-  (:import [java.util.zip ZipEntry ZipOutputStream ZipInputStream])
+  (:import [java.util.zip ZipEntry ZipOutputStream ZipInputStream]
+           [net.lingala.zip4j.core ZipFile]
+           [net.lingala.zip4j.util Zip4jConstants]
+           [net.lingala.zip4j.model ZipParameters])
   (:require [clojure.java.io :as io]))
 
 (defn zip-folder
@@ -53,6 +56,23 @@
           (.close output)
           (recur (.getNextEntry input))))))
     (.closeEntry input)))
+
+(defn unzip-encrypted
+  [filename output-parent password]
+  (let [zip-file (ZipFile. filename)]
+    (if (.isEncrypted zip-file) (.setPassword zip-file password))
+    (.extractAll zip-file output-parent)))
+
+(defn zip-encrypted
+  [filename output-filename password]
+  (let [zip-params (ZipParameters.)
+        zip-file (ZipFile. output-filename)]
+    (.setCompressionMethod zip-params (. Zip4jConstants COMP_DEFLATE))
+    (.setCompressionLevel zip-params (. Zip4jConstants DEFLATE_LEVEL_NORMAL))
+    (.setEncryptFiles zip-params true)
+    (.setEncryptionMethod zip-params (. Zip4jConstants ENC_METHOD_STANDARD))
+    (.setPassword zip-params password)
+    (.addFolder zip-file filename zip-params)))
 
 (defn tmp-file
   "returns a temporary file object that will delete on exit"
