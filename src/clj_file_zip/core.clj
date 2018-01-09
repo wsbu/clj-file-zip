@@ -31,18 +31,6 @@
    (zip input-filename output-filename (.getName (io/file input-filename)))
    output-filename))
 
-(defn zip-files
-  "Takes a collection of filenames and zips them into output-filename
-   Eg: (zip-files \"/tmp/foo\" \"/tmp/foo.zip\")
-   result: /tmp/foo.zip with the contents of /tmp/foo (file or directory)"
-  [filenames output-filename]
-  (with-open [out (ZipOutputStream. (io/output-stream output-filename))]
-    (loop [files filenames]
-      (if (> (count files) 0)
-        (do (zip-folder (io/file (first files)) (.getName (io/file (first files))) out)
-            (recur (rest files)))
-        output-filename))))
-
 (defn unzip
   "Unzips zip archive filename and write all contents to dir output-parent"
   [filename output-parent]
@@ -56,6 +44,18 @@
           (.close output)
           (recur (.getNextEntry input))))))
     (.closeEntry input)))
+
+(defn zip-files
+  "Takes a collection of filenames and zips them into output-filename
+   Eg: (zip-files \"/tmp/foo\" \"/tmp/foo.zip\")
+   result: /tmp/foo.zip with the contents of /tmp/foo (file or directory)"
+  [filenames output-filename]
+  (with-open [out (ZipOutputStream. (io/output-stream output-filename))]
+    (loop [files filenames]
+      (if (> (count files) 0)
+        (do (zip-folder (io/file (first files)) (.getName (io/file (first files))) out)
+            (recur (rest files)))
+        output-filename))))
 
 (defn unzip-encrypted
   [filename output-parent password]
@@ -75,17 +75,26 @@
     (.addFolder zip-file filename zip-params)))
 
 (defn tmp-file
-  "returns a temporary file object that will delete on exit"
+  "returns a temporary file object"
   []
   (let [file (. java.io.File createTempFile "clj-file-zip-" ".tmp")]
-    ;(.deleteOnExit file)
     file))
 
 (defn tmp-dir
-  "returns a temporary file object that will delete on exit"
+  "returns a temporary file object"
   []
   (let [file (tmp-file)]
     (.delete file)
     (.mkdir file)
-    ;(.deleteOnExit file)
     file))
+
+(defn delete-file
+  "recursively deletes file (string filename)"
+  [file]
+  (loop [files (vec [(io/file file)])]
+    (when (not (empty? files))
+      (let [f (first files)]
+        (if (and (.isDirectory f) (> (count (.listFiles f)) 0))
+            (recur (concat (vec (.listFiles f)) files))
+            (do (.delete f)
+                (recur (rest files))))))))
