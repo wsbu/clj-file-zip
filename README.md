@@ -2,11 +2,6 @@
 
 A simple Clojure library for dealing with zip files
 
-## Usage
-[![Clojars Project](https://img.shields.io/clojars/v/clj-file-zip.svg)](https://clojars.org/clj-file-zip)
-<br>
-[![CircleCI](https://circleci.com/gh/komcrad/clj-file-zip/tree/master.svg?style=shield&circle-token=36a9de2434ee125bc369c8f691f802dc11f30617)](https://circleci.com/gh/komcrad/clj-file-zip/tree/master)
-
 ## Example
 
 ### Assuming you're in a repl (`lein repl`)...
