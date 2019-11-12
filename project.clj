@@ -1,4 +1,4 @@
-(defproject clj-file-zip "0.1.0"
+(defproject net.redlion/clj-file-zip "0.1.0"
   :description "A simple Clojure library for dealing with zip files"
   :url "https://github.com/wsbu/clj-file-zip"
   :license {:name "GNU Lesser Genereal Public License"
